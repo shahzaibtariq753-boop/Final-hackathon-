@@ -21,10 +21,11 @@ npm install
 Copy-Item .env.example .env
 ```
 
-Edit `backend/.env` on your computer. Set:
+Edit `backend/.env` on your computer. Configure:
 
-- `MONGO_URI`: your MongoDB Atlas connection string. URL-encode special characters in the database username or password. In Atlas, allow connections from your backend host.
-- `JWT_SECRET`: a private random secret of at least 32 characters. Generate one with `node -e "console.log(require('crypto').randomBytes(48).toString('base64url'))"`.
+- `DB_URI`: your MongoDB Atlas connection string. The backend also accepts `MONGO_URI`. URL-encode special characters in the database username or password. In Atlas, allow connections from your backend host.
+- `DB_NAME`: the Atlas database name to use.
+- `SECRET_KEY`: a private random secret of at least 32 characters. The backend also accepts `JWT_SECRET`. Generate one with `node -e "console.log(require('crypto').randomBytes(48).toString('base64url'))"`.
 - `FRONTEND_URL`: `http://localhost:3000` for local development. In production, use your deployed frontend URL instead.
 - `AI_API_KEY`: optional. Leave it empty to use the non-AI parts of the app; AI endpoints explain that a key is needed.
 
@@ -73,7 +74,7 @@ Deploy `backend` as a long-running Node.js web service on your chosen Node hosti
 
 - Start command: `npm start`
 - Health-check path: `/health`
-- Environment variables: `MONGO_URI`, a new private `JWT_SECRET`, `FRONTEND_URL` or comma-separated `FRONTEND_URLS`, `NODE_ENV=production`, and optionally `AI_API_KEY`, `AI_MODEL` and `AI_BASE_URL`.
+- Environment variables: `DB_URI`, `DB_NAME`, a new private `SECRET_KEY`, `FRONTEND_URL` (or comma-separated `FRONTEND_URLS`), `NODE_ENV=production`, and optionally `AI_API_KEY`, `AI_MODEL` and `AI_BASE_URL`. The equivalent `MONGO_URI` and `JWT_SECRET` names are supported too.
 
 Add the exact HTTPS Vercel application origin to `FRONTEND_URL`. For more than one allowed origin, use `FRONTEND_URLS` with comma-separated origin URLs. Do not add a trailing slash or use `*`. Keep the API service publicly reachable by the browser, configure HTTPS, and allow its outbound connection to Atlas. The database and JWT secrets belong only in the hosting provider’s secret/environment settings.
 

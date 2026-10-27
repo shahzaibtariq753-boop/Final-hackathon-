@@ -4,6 +4,14 @@ const { calculateAnnualTax } = require('../src/utils/taxCalculator');
 const { calculateDistanceInMeters } = require('../src/utils/haversine');
 const { workingDaysBetween } = require('../src/utils/workingDays');
 const { companyDateString, isLate, isValidDateString } = require('../src/utils/companyTime');
+const { getJwtSecret, getMongoUri } = require('../src/config/environment');
+
+test('deployment environment aliases resolve to the API configuration names', () => {
+  assert.equal(getJwtSecret({ SECRET_KEY: 'provider-secret' }), 'provider-secret');
+  assert.equal(getJwtSecret({ JWT_SECRET: 'app-secret', SECRET_KEY: 'provider-secret' }), 'app-secret');
+  assert.equal(getMongoUri({ DB_URI: 'mongodb://provider-host' }), 'mongodb://provider-host');
+  assert.equal(getMongoUri({ MONGO_URI: 'mongodb://app-host', DB_URI: 'mongodb://provider-host' }), 'mongodb://app-host');
+});
 
 test('annual tax applies the configured illustrative tax slabs', () => {
   assert.equal(calculateAnnualTax(600000), 0);

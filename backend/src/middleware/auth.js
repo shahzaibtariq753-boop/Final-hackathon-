@@ -1,15 +1,17 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const { getJwtSecret } = require('../config/environment');
 
 const authGuard = async (req, res, next) => {
   const token = req.headers.authorization?.split(' ')[1];
   if (!token) return res.status(401).json({ error: 'Unauthorized: Token missing' });
 
   try {
-    if (!process.env.JWT_SECRET || process.env.JWT_SECRET.length < 32 || /replace|change.?me|example/i.test(process.env.JWT_SECRET)) {
-      return res.status(503).json({ error: 'Authentication is not configured. Set a private JWT_SECRET of at least 32 characters.' });
+    const jwtSecret = getJwtSecret();
+    if (!jwtSecret || jwtSecret.length < 32 || /replace|change.?me|example/i.test(jwtSecret)) {
+      return res.status(503).json({ error: 'Authentication is not configured. Set a private SECRET_KEY (or JWT_SECRET) of at least 32 characters.' });
     }
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, jwtSecret);
     const user = await User.findById(decoded.id).select('email role employeeId isActive mustChangePassword tokenVersion').lean();
     if (!user || !user.isActive || decoded.tokenVersion !== (user.tokenVersion || 0)) {
       return res.status(401).json({ error: 'This session is no longer valid. Please sign in again.' });

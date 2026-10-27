@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const connectDB = require('./config/db');
+const { getJwtSecret } = require('./config/environment');
 const apiRoutes = require('./routes/api');
 const { authRateLimit, requestRateLimit } = require('./middleware/rateLimit');
 
@@ -41,8 +42,9 @@ app.use((err, req, res, next) => {
 
 async function startServer() {
   try {
-    if (!process.env.JWT_SECRET || process.env.JWT_SECRET.length < 32 || /replace|change.?me|example/i.test(process.env.JWT_SECRET)) {
-      throw new Error('Set JWT_SECRET to a private random value of at least 32 characters before starting the API.');
+    const jwtSecret = getJwtSecret();
+    if (!jwtSecret || jwtSecret.length < 32 || /replace|change.?me|example/i.test(jwtSecret)) {
+      throw new Error('Set SECRET_KEY (or JWT_SECRET) to a private random value of at least 32 characters before starting the API.');
     }
     await connectDB();
     const port = Number(process.env.PORT) || 5000;

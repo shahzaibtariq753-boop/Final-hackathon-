@@ -5,10 +5,12 @@ const mongoose = require('mongoose');
 const User = require('../models/User');
 const CompanySettings = require('../models/CompanySettings');
 const { logAudit } = require('../utils/audit');
+const { getJwtSecret } = require('../config/environment');
 
 function createToken(user) {
-  if (!process.env.JWT_SECRET || process.env.JWT_SECRET.length < 32 || /replace|change.?me|example/i.test(process.env.JWT_SECRET)) {
-    throw new Error('Set JWT_SECRET to a private random value of at least 32 characters.');
+  const jwtSecret = getJwtSecret();
+  if (!jwtSecret || jwtSecret.length < 32 || /replace|change.?me|example/i.test(jwtSecret)) {
+    throw new Error('Set SECRET_KEY (or JWT_SECRET) to a private random value of at least 32 characters.');
   }
   return jwt.sign({
     id: user._id,
@@ -16,7 +18,7 @@ function createToken(user) {
     role: user.role,
     employeeId: user.employeeId,
     tokenVersion: user.tokenVersion || 0
-  }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN || '12h' });
+  }, jwtSecret, { expiresIn: process.env.JWT_EXPIRES_IN || '12h' });
 }
 
 exports.checkFirstRun = async (req, res) => {
@@ -31,8 +33,9 @@ exports.firstRunSetup = async (req, res) => {
     adminPassword: Joi.string().min(10).max(128).required()
   }).validate(req.body, { abortEarly: false, stripUnknown: true });
   if (error) return res.status(400).json({ error: error.details.map((item) => item.message.replaceAll('"', '')).join('. ') });
-  if (!process.env.JWT_SECRET || process.env.JWT_SECRET.length < 32 || /replace|change.?me|example/i.test(process.env.JWT_SECRET)) {
-    return res.status(503).json({ error: 'Set a private JWT_SECRET of at least 32 characters before initializing the company.' });
+  const jwtSecret = getJwtSecret();
+  if (!jwtSecret || jwtSecret.length < 32 || /replace|change.?me|example/i.test(jwtSecret)) {
+    return res.status(503).json({ error: 'Set a private SECRET_KEY (or JWT_SECRET) of at least 32 characters before initializing the company.' });
   }
   const session = await mongoose.startSession();
   let adminUser;
@@ -75,8 +78,9 @@ exports.login = async (req, res) => {
   if (!user || !user.isActive || !(await bcrypt.compare(value.password, user.password))) {
     return res.status(401).json({ error: 'Invalid email or password.' });
   }
-  if (!process.env.JWT_SECRET || process.env.JWT_SECRET.length < 32 || /replace|change.?me|example/i.test(process.env.JWT_SECRET)) {
-    return res.status(503).json({ error: 'Authentication is not configured. Set a private JWT_SECRET of at least 32 characters.' });
+  const jwtSecret = getJwtSecret();
+  if (!jwtSecret || jwtSecret.length < 32 || /replace|change.?me|example/i.test(jwtSecret)) {
+    return res.status(503).json({ error: 'Authentication is not configured. Set a private SECRET_KEY (or JWT_SECRET) of at least 32 characters.' });
   }
   return res.json({
     token: createToken(user),
