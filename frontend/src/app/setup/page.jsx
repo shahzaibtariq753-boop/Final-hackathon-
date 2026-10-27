@@ -26,8 +26,8 @@ export default function SetupPage() {
       return setError('Passwords do not match');
     }
 
-    if (formData.adminPassword.length < 6) {
-      return setError('Password must be at least 6 characters');
+    if (formData.adminPassword.length < 10) {
+      return setError('Password must be at least 10 characters');
     }
 
     setLoading(true);

@@ -11,7 +11,8 @@ async function logAudit(actor, action, entity, entityId, beforeState, afterState
       afterState
     });
   } catch (err) {
-    console.error("Audit log failed:", err.message);
+    console.error('Audit log failed:', err.message);
+    throw new Error(`Unable to record the ${action} audit entry.`, { cause: err });
   }
 }
 

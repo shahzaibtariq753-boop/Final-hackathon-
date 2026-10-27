@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 
 const companySettingsSchema = new mongoose.Schema({
   companyName: { type: String, required: true },
+  timeZone: { type: String, default: 'Asia/Karachi' },
   officeStart: { type: String, default: "09:00" },
   graceMinutes: { type: Number, default: 15 },
   halfDayUnderHours: { type: Number, default: 5 },
