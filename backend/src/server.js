@@ -97,6 +97,23 @@ async function ensureReady() {
   await dbReadyPromise;
 }
 
+
+
+/* =========================================
+   ROOT ROUTE
+========================================= */
+
+app.get('/', (req, res) => {
+  res.status(200).json({
+    status: 'success',
+    message: 'HCM Lite API is running!',
+    health: '/health',
+    api: '/api',
+  });
+});
+
+
+
 /* =========================================
    HEALTH CHECK
 ========================================= */
